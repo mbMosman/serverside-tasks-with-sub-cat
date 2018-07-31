@@ -24,8 +24,9 @@ This code does not have a front-end or client-side user interface. However you c
 ## API
 
 ### Get All Tasks
-Request Type: GET
-Url: `/task`
+
+- Request Type: GET
+- Url: `/task`
 
 This will get all tasks from the database and return them as an array of task objects.
 
@@ -54,9 +55,10 @@ Response Format:
 ```
 
 ### Add New Task
-Request Type: POST
-Url: `/task`
-Body: 
+
+- Request Type: POST
+- Url: `/task`
+- Sample Body: 
 ```
 { task: {
     description: string,
@@ -80,15 +82,17 @@ Body:
 This will add a new task to the database. 
 
 ### Delete a Task
-Request Type: DELETE
-Url: `/task/:id`
+
+- Request Type: DELETE
+- Url: `/task/:id`
 
 This will remove a task from the database.
 
 ### Update a Task
-Request Type: PUT
-Url: `/task/:id`
-Body: 
+
+- Request Type: PUT
+- Url: `/task/:id`
+-  Sample Body: 
 ```
 { task: {
     description: string (optional),
@@ -99,18 +103,20 @@ Body:
 }
 ```
 
-This will update any included task properties in the database. If a property is not included it's value will not be modified.
+This will update any included task properties in the database. If a property is not included it's value will not be modified.  This will not update subtasks.
 
 ### Get All Categories
-Request Type: GET
-Url: `/task/category`
 
-This will get all task categories from the database and return them as an array of category objects.
+- Request Type: GET
+- Url: `/task/category`
+
+This will get all task categories from the database and return them as an array of category objects. The results are sorted by name.
 
 ### Add Task Category
-Request Type: POST
-Url: `/task/category`
-Body: 
+
+- Request Type: POST
+- Url: `/task/category`
+- Body: 
 ```
 { category: {
     name: string
@@ -121,15 +127,17 @@ Body:
 This will add a new task category to the database. 
 
 ### Delete a Task Category
-Request Type: DELETE
-Url: `/task/category/:id`
+
+- Request Type: DELETE
+- Url: `/task/category/:id`
 
 This will remove a task category from the database.
 
 ### Update a Task Category
-Request Type: PUT
-Url: `/task/category/:id`
-Body: 
+
+- Request Type: PUT
+- Url: `/task/category/:id`
+- Body: 
 ```
 { category: {
     name: string
@@ -140,15 +148,17 @@ Body:
 This will update a task category name. 
 
 ### Get A Subtask
-Request Type: GET
-Url: `/task/subtask/:id`
+
+- Request Type: GET
+- Url: `/task/subtask/:id`
 
 This will get a subtask from the database.
 
 ### Add Subtasks
-Request Type: POST
-Url: `/task/:id/subtasks`
-Body: 
+
+- Request Type: POST
+- Url: `/task/:id/subtask`
+- Body: 
 ```
 { subtasks: [
     {
@@ -162,15 +172,16 @@ Body:
 This will add new subtasks to an existing task in the database. 
 
 ### Delete a Subtask
-Request Type: DELETE
-Url: `/task/subtask/:id`
+
+- Request Type: DELETE
+- Url: `/task/subtask/:id`
 
 This will remove a subtask from the database.
 
 ### Update a subtask
-Request Type: PUT
-Url: `/task/subtask/:id`
-Body: 
+- Request Type: PUT
+- Url: `/task/subtask/:id`
+- Body: 
 ```
 { subtask: {
     description: string (optional),
