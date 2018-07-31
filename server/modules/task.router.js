@@ -250,12 +250,12 @@ router.put('/subtask/:id', (req, res) => {
   let setSql = '';
   const values = [subtaskId];
   let counter = 2;
-  if (newSubtask.description) {
+  if (newSubtask.description != null) {
     setSql += ` description=$${counter},`;
     counter++;
     values.push(newSubtask.description);
   } 
-  if (newSubtask.complete) {
+  if (newSubtask.complete != null) {
     setSql += ` complete=$${counter},`;
     counter++;
     values.push(newSubtask.complete);
@@ -263,7 +263,9 @@ router.put('/subtask/:id', (req, res) => {
   //Remove trailing , at end of update fields
   setSql = setSql.substring(0, setSql.length - 1);
 
+  
   const sqlText = `UPDATE subtask SET ${setSql} WHERE id=$1;`
+  console.log(sqlText);
   pool.query(sqlText, values)
   .then((result) => {
     res.sendStatus(200);
