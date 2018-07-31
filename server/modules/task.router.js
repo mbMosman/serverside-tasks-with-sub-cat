@@ -31,64 +31,148 @@ router.get('/', (req, res) => {
     })
 });
 
+// Add task
+router.post('/', (req, res) => {
+  const task = req.body.task;
+  const subtasks = task.subtasks ? task.subtasks : [];
 
+  if (task.description == null) {
+    res.sendStatus(500);
+    console.log('Error adding task, description is required.');
+    return;
+  }
 
-/*
-### Add New Task
-Request Type: POST
-Url: `/task`
-Body: 
-```
-{ task: {
-    description: string,
-    created: date (optional, defaults to now)
-    due: date (optional),
-    complete: boolean (optional, defaults to false)
-    category_id: integer (optional)
-    category: {
-      name: string (optional, creates new category)
-    },
-    subtasks: [
-    {
-      description: string,
-      complete: boolean (optional, defaults to false)
+  if (task.category == null && task.category_id == null) {
+    res.sendStatus(500);
+    console.log('Error adding task, category is required.');
+    return;
+  }
+
+  (async () => {
+    const client = await pool.connect()
+    try {
+      await client.query('BEGIN');
+      // Add new category if needed
+      if (task.category_id == null && task.category != null) {
+        const categorySql = 'INSERT INTO category (name) VALUES ($1) RETURNING id';
+        const { rows } = await client.query(categorySql, [task.category.name]);
+        task.category_id = rows[0].id;
+      }
+      
+      // Add task & get back id
+      const queryStuff = buildInsertSqlForTask(task);
+      const { rows } = await client.query(queryStuff.sqlText, queryStuff.values);
+      task.id = rows[0].id
+
+      // Add subtasks
+      for (newSubtask of subtasks) {
+        const queryStuff = buildInsertSqlForSubtask(newSubtask, task.id)
+        const { rows } = await client.query(queryStuff.sqlText, queryStuff.values);
+      }
+
+      await client.query('COMMIT')
+      res.sendStatus(201);
+    } catch (err) {
+      await pool.query('ROLLBACK')
+      console.log(`Error adding subtasks`, err);
+      res.sendStatus(500);
+    } finally {
+      client.release()
     }
-  ]
+  })().catch(e => console.error(e.stack))
+});
+
+// Description & category are required.
+function buildInsertSqlForTask(newTask) {
+  let fieldsSql = '(description, category_id,';
+  let valuesSql = '($1, $2,'
+  const values = [newTask.description, newTask.category_id];
+
+  let counter = 3;
+  if (newTask.created) {
+    fieldsSql += ` created,`;
+    valuesSql += ` $${counter++},`;
+    values.push(newTask.created);
+  } 
+  if (newTask.due) {
+    fieldsSql += ` due,`;
+    valuesSql += ` $${counter++},`;
+    values.push(newTask.due);
+  } 
+  if (newTask.complete) {
+    fieldsSql += ` complete,`;
+    valuesSql += ` $${counter++},`;
+    values.push(newTask.complete);
+  }
+  //Remove trailing , at end of fields
+  fieldsSql = fieldsSql.substring(0, fieldsSql.length - 1);
+  valuesSql = valuesSql.substring(0, valuesSql.length - 1);
+  //Add trailing ) at end of fields
+  fieldsSql = fieldsSql + ')';
+  valuesSql = valuesSql + ')';
+
+  const sqlText = `INSERT INTO task ${fieldsSql} VALUES ${valuesSql} RETURNING id;`;
+  return {
+    sqlText: sqlText,
+    values: values
   }
 }
-```
 
-This will add a new task to the database. 
-*/
+// Delete a task
+router.delete('/:id', (req, res) => {
+  const taskId = req.params.id;
+  const sqlText = 'DELETE FROM task WHERE id=$1;'
+  pool.query(sqlText, [taskId])
+  .then((result) => {
+    res.sendStatus(200);
+  })
+  .catch( (err) => {
+    console.log(`Error removing task with id=${taskId}`, err);
+    res.sendStatus(500);
+  })
+});
 
-
-/*
-
-### Delete a Task
-Request Type: DELETE
-Url: `/task/:id`
-
-This will remove a task from the database.
-
-### Update a Task
-Request Type: PUT
-Url: `/task/:id`
-Body: 
-```
-{ task: {
-    description: string (optional),
-    due: date (optional),
-    complete: boolean (optional)
-    category_id: integer (optional) 
+// Update a task
+router.put('/:id', (req, res) => {
+  const newTask = req.body.task;
+  const taskId = req.params.id;
+  let setSql = '';
+  const values = [taskId];
+  let counter = 2;
+  if (newTask.description != null) {
+    setSql += ` description=$${counter},`;
+    counter++;
+    values.push(newTask.description);
+  }  
+  if (newTask.due != null) {
+    setSql += ` due=$${counter},`;
+    counter++;
+    values.push(newTask.due);
   }
-}
-```
+  if (newTask.complete != null) {
+    setSql += ` complete=$${counter},`;
+    counter++;
+    values.push(newTask.complete);
+  }
+  if (newTask.category_id != null) {
+    setSql += ` category_id=$${counter},`;
+    counter++;
+    values.push(newTask.category_id);
+  }
+  //Remove trailing , at end of update fields
+  setSql = setSql.substring(0, setSql.length - 1);
 
-This will update any included task properties in the database. If a property is not included it's value will not be modified.
-*/
-
-
-
+  const sqlText = `UPDATE task SET ${setSql} WHERE id=$1;`
+  console.log(sqlText);
+  pool.query(sqlText, values)
+  .then((result) => {
+    res.sendStatus(200);
+  })
+  .catch( (err) => {
+    console.log('Error updating task: ', err);
+    res.sendStatus(500);
+  })
+});
 
 //Get all categories
 router.get('/category', (req, res) => {
@@ -184,19 +268,22 @@ router.post('/:id/subtask', (req, res) => {
   const subtasks = req.body.subtasks;
 
   (async () => {
+    const client = await pool.connect();
     try {
-      await pool.query('BEGIN')
+      await client.query('BEGIN')
       for (newSubtask of subtasks) {
         const queryStuff = buildInsertSqlForSubtask(newSubtask, taskId)
-        const { rows } = await pool.query(queryStuff.sqlText, queryStuff.values);
+        const { rows } = await client.query(queryStuff.sqlText, queryStuff.values);
       }
-      await pool.query('COMMIT')
+      await client.query('COMMIT')
       res.sendStatus(201);
     } catch (err) {
       await pool.query('ROLLBACK')
       console.log(`Error adding subtasks`, err);
       res.sendStatus(500);
-    } 
+    } finally {
+      client.release();
+    }
   })().catch(e => console.error(e.stack))
 });
 

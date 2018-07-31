@@ -14,7 +14,7 @@ CREATE TABLE task (
 
 CREATE TABLE subtask (
 	id serial primary key,
-	task_id int NOT NULL REFERENCES task,
+	task_id int NOT NULL REFERENCES task ON DELETE CASCADE,
 	description varchar(250) NOT NULL,
 	complete boolean DEFAULT FALSE
 );
