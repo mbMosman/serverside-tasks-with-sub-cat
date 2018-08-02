@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../modules/pool');
 
+const DEFAULT_ERROR = 'Unexpected error';
+
 // Get all tasks
 router.get('/', (req, res) => {
 
@@ -30,6 +32,9 @@ router.get('/', (req, res) => {
       res.sendStatus(500);
     })
 });
+
+
+
 
 // Add task
 router.post('/', (req, res) => {
@@ -179,25 +184,81 @@ router.get('/category', (req, res) => {
   const sqlText = 'SELECT * FROM category ORDER BY name;'
   pool.query(sqlText)
   .then((result) => {
-    res.send(result.rows);
+    res.send({
+      status: { 
+        code: 'OK'
+      },
+      categories: result.rows
+    });
   })
   .catch( (err) => {
-    console.log('Error getting all tasks: ', err);
-    res.sendStatus(500);
+    console.log('Error getting all categories: ', err);
+    res.send({
+      status: { 
+        code: 'ERROR',
+        message: DEFAULT_ERROR
+      }
+    });
+  })
+})
+
+//Get a specific category
+router.get('/category/:id', (req, res) => {
+  const categoryId = req.params.id;
+  const sqlText = 'SELECT id, name FROM category WHERE id=$1;'
+  pool.query(sqlText, [categoryId])
+  .then((result) => {
+    let category = null;
+      if (result.rows.length > 0) {
+        category = result.rows[0];
+      }
+      res.send( { 
+        status: {code: 'OK'},
+        category: category 
+      });
+  })
+  .catch( (err) => {
+    console.log(`Error getting category with id: ${categoryId}`, err);
+    res.send({
+      status: { 
+        code: 'ERROR',
+        message: DEFAULT_ERROR
+      }
+    });
   })
 })
 
 // Add a category
 router.post('/category', (req, res) => {
   const newCategory = req.body.category;
+
+  if (newCategory == null || newCategory.name == null) {
+    res.send({
+      status: { 
+        code: 'ERROR',
+        message: 'Must send category with a name'
+      }
+    });
+    return;
+  }
+
   const sqlText = 'INSERT INTO category (name) VALUES ($1);'
   pool.query(sqlText, [newCategory.name])
   .then((result) => {
-    res.sendStatus(201);
+    res.send({
+      status: { 
+        code: 'OK'
+      }
+    });
   })
   .catch( (err) => {
-    console.log(`Error adding task`, err);
-    res.sendStatus(500);
+    console.log(`Error adding category`, err);
+    res.send({
+      status: { 
+        code: 'ERROR',
+        message: DEFAULT_ERROR
+      }
+    });
   })
 });
 
@@ -207,26 +268,59 @@ router.delete('/category/:id', (req, res) => {
   const sqlText = 'DELETE FROM category WHERE id=$1;'
   pool.query(sqlText, [categoryId])
   .then((result) => {
-    res.sendStatus(200);
+    res.send({
+      status: { 
+        code: 'OK'
+      }
+    });
   })
   .catch( (err) => {
+    let errorMessage = DEFAULT_ERROR;
+    if ( err.code == 23503 ) {
+      errorMessage = 'Cannot remove category associated with tasks'
+    }
     console.log(`Error removing category with id=${categoryId}`, err);
-    res.sendStatus(500);
+    res.send({
+      status: { 
+        code: 'ERROR',
+        message: errorMessage
+      }
+    });
   })
 });
 
 // Update a category
 router.put('/category/:id', (req, res) => {
-  const newCategory = req.body.category;
   const categoryId = req.params.id;
+  const newCategory = req.body.category;
+
+  if (newCategory == null || newCategory.name == null) {
+    res.send({
+      status: { 
+        code: 'ERROR',
+        message: 'Must send category with a name'
+      }
+    });
+    return;
+  }
+
   const sqlText = 'UPDATE category SET name=$1 WHERE id=$2;'
   pool.query(sqlText, [newCategory.name, categoryId])
   .then((result) => {
-    res.sendStatus(200);
+    res.send({
+      status: { 
+        code: 'OK'
+      }
+    });
   })
   .catch( (err) => {
     console.log('Error updating category: ', err);
-    res.sendStatus(500);
+    res.send({
+      status: { 
+        code: 'ERROR',
+        message: DEFAULT_ERROR
+      }
+    });
   })
 });
 
@@ -361,6 +455,43 @@ router.put('/subtask/:id', (req, res) => {
     console.log('Error updating subtask: ', err);
     res.sendStatus(500);
   })
+});
+
+// Get a specific task
+// This is at the end so it doesn't pickup other paths as the id
+router.get('/:id', (req, res) => {
+
+  const taskId = req.params.id;
+
+  // More infor on this query: 
+  // https://foxypanda.me/returning-an-array-of-json-objects-in-postgresql/
+  const sqlText = 
+  `SELECT 
+    task.*, 
+	  CASE WHEN count(st) = 0 THEN ARRAY[]::json[] ELSE array_agg(st.subtask) END AS subtasks,
+	  json_build_object('id', c.id, 'name', c.name) as category
+  FROM task 
+  JOIN category c ON task.category_id = c.id 
+  LEFT OUTER JOIN (
+      SELECT task_id, json_build_object('id', subtask.id, 'task_id', subtask.task_id, 'description', 	subtask.description, 'complete', subtask.complete) as subtask
+      FROM subtask ORDER BY subtask.id
+    ) st on st.task_id=task.id 
+  WHERE task.id = $1 
+  GROUP BY task.id, c.id, c.name 
+  ORDER BY task.id;`;
+
+  pool.query(sqlText, [taskId])
+    .then((result) => {
+      let task = null;
+      if (result.rows.length > 0) {
+        task = result.rows[0];
+      }
+      res.send( { task: task } );
+    })
+    .catch( (err) => {
+      console.log('Error getting all tasks: ', err);
+      res.sendStatus(500);
+    })
 });
 
 module.exports = router;
