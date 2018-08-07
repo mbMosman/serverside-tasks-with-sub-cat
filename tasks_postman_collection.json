@@ -1,0 +1,1141 @@
+{
+	"info": {
+		"_postman_id": "5b146f94-dc24-401d-9446-e00f8882973c",
+		"name": "Tasks With Subtasks & Categories",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"_postman_id": "bb0c3c0f-334b-4091-b85e-2435ba8c996d",
+			"name": "Get All Tasks",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "localhost:5000/task",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"task"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "5e5d86ac-067b-47a3-9c82-c7296ec8e0a2",
+			"name": "Get a specific Task - Update URL",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "0a9f398a-387f-4da8-8b84-f0762bfd796e",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "localhost:5000/task/4",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"task",
+						"4"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "9cb36ade-ca18-4670-b822-84283763ef90",
+			"name": "Add a Task - Update Body",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "964eb685-6ee2-4a9d-90f9-a7475c876071",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is created\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"task\":  {\n        \"description\": \"New Task\",\n        \"subtasks\": [\n            {\n                \"description\": \"Subtask 1\",\n                \"complete\": false\n            },\n            {\n                \"description\": \"Subtask 2\",\n                \"complete\": false\n            }\n        ],\n        \"category\": {\n            \"name\": \"New Category\"\n        }\n    }\n}"
+				},
+				"url": {
+					"raw": "localhost:5000/task",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"task"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "0f09183c-db3d-4fa0-8df8-731a4641dba1",
+			"name": "Get All categories",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "69dd534e-c3f4-43b0-9a44-917aa9fa775a",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"HTTP Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"var response_schema = {",
+							"    \"properties\": {",
+							"        \"status\": { ",
+							"            \"type\": \"object\",",
+							"            \"properties\": {",
+							"                \"code\": \"string\",",
+							"                \"message\": \"string\"",
+							"            },",
+							"            \"required\": [ \"code\" ]",
+							"        },",
+							"        \"categories\": { ",
+							"            \"type\": \"array\",",
+							"            \"items\": {",
+							"                \"type\": \"object\",",
+							"                \"properties\": {",
+							"                    \"id\": {\"type\": \"integer\" },",
+							"                    \"name\": {\"type\": \"string\" }",
+							"                },",
+							"                \"required\": [ \"id\", \"name\" ]",
+							"            }",
+							"        }",
+							"    },",
+							"    \"required\": [ \"status\", \"categories\" ]",
+							"}",
+							"",
+							"var jsonResponse = pm.response.json();",
+							"",
+							"pm.test('Response is valid', function() {",
+							"  var validationResult = tv4.validate(jsonResponse, response_schema);",
+							"  console.log(tv4.error);",
+							"  pm.expect(validationResult).to.be.true;",
+							"});",
+							"",
+							"pm.test(\"Response Status is OK\", function () {",
+							"    pm.expect(jsonResponse.status.code).to.eql('OK');",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "localhost:5000/task/category",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"task",
+						"category"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "ae58ef21-543e-44d7-a671-a179896f0a9e",
+			"name": "Get a Specific Category",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "5f71a22f-8136-4ce2-a2a3-9240f45d799b",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"HTTP Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"var response_schema = {",
+							"    \"properties\": {",
+							"        \"status\": { ",
+							"            \"type\": \"object\",",
+							"            \"properties\": {",
+							"                \"code\": \"string\",",
+							"                \"message\": \"string\"",
+							"            },",
+							"            \"required\": [ \"code\" ]",
+							"        },",
+							"        \"category\": {",
+							"            \"type\": \"object\",",
+							"            \"properties\": {",
+							"                \"id\": {\"type\": \"integer\" },",
+							"                \"name\": {\"type\": \"string\" }",
+							"            }",
+							"        }",
+							"    },",
+							"    \"required\": [ \"status\", \"category\" ]",
+							"}",
+							"",
+							"// Get the Response JSON",
+							"var jsonResponse = pm.response.json();",
+							"",
+							"pm.test('Response is valid', function() {",
+							"  var validationResult = tv4.validate(jsonResponse, response_schema);",
+							"  console.log(tv4.error);",
+							"  pm.expect(validationResult).to.be.true;",
+							"});",
+							"",
+							"pm.test(\"Response Status is OK\", function () {",
+							"    pm.expect(jsonResponse.status.code).to.eql('OK');",
+							"});",
+							"",
+							"// Check specific values",
+							"var testCategoryName = pm.environment.get(\"testCategoryForAdd\");",
+							"var testCategoryIdFromAdd = pm.environment.get(\"testCategoryIdFromAdd\");",
+							"",
+							"var responseCategory = jsonResponse.category;",
+							"pm.expect(responseCategory.id).to.be.eql(testCategoryIdFromAdd);",
+							"pm.expect(responseCategory.name).to.be.eql(testCategoryName);",
+							"",
+							"//Remove the added Category for cleanup",
+							"var deleteURL = 'localhost:5000/task/category/' + testCategoryIdFromAdd;",
+							"pm.sendRequest({url: deleteURL, method: 'DELETE'}, function (err, response) {",
+							"    if (err) console.log('Could not cleanup after \"Update Category - Good\" test', err);",
+							"});"
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "25161708-ba7b-4959-bb51-b78ffbd8c963",
+						"type": "text/javascript",
+						"exec": [
+							"var testCategoryIdFromAdd = null;",
+							"",
+							"// Add a category to update",
+							"var testCategoryName = pm.environment.get(\"testCategoryForAdd\");",
+							"pm.sendRequest(",
+							"    {",
+							"        url: 'localhost:5000/task/category/',",
+							"        method: 'POST',",
+							"        header: {'content-type': 'application/json'},",
+							"        body: {",
+							"            mode: 'raw',",
+							"            raw: JSON.stringify({ category: { name: testCategoryName } })",
+							"        }",
+							"    }, ",
+							"    function (err, response) {",
+							"        if (err) {",
+							"            console.log('Could not setup data for \"Get a Specific Category\" test', err);",
+							"        } else {",
+							"            // Find the category & get ID for update",
+							"            pm.sendRequest(\"localhost:5000/task/category\", function (err, response) {",
+							"                ",
+							"                var testCategoryName = pm.environment.get(\"testCategoryForAdd\");",
+							"                var categories = response.json().categories;",
+							"                ",
+							"                for (var category of categories) {",
+							"                    if (category.name == testCategoryName) {",
+							"                        pm.environment.set(\"testCategoryIdFromAdd\", category.id);",
+							"                        break;",
+							"                    }",
+							"                }",
+							"            });",
+							"        }",
+							"    }",
+							");",
+							"",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "localhost:5000/task/category/{{testCategoryIdFromAdd}}",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"task",
+						"category",
+						"{{testCategoryIdFromAdd}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "b7cfe4cf-5ae1-46ca-8daa-4b078415bb37",
+			"name": "Add New Category - Test 1 - Good",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "85b96e49-ce47-44fb-8801-f3c1e67c6df7",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"HTTP Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"var response_schema = {",
+							"    \"properties\": {",
+							"        \"status\": { ",
+							"            \"type\": \"object\",",
+							"            \"properties\": {",
+							"                \"code\": \"string\",",
+							"                \"message\": \"string\"",
+							"            },",
+							"            \"required\": [ \"code\" ]",
+							"        }",
+							"    },",
+							"    \"required\": [ \"status\" ]",
+							"}",
+							"",
+							"var jsonResponse = pm.response.json();",
+							"",
+							"pm.test('Response is valid', function() {",
+							"  var validationResult = tv4.validate(jsonResponse, response_schema);",
+							"  console.log(tv4.error);",
+							"  pm.expect(validationResult).to.be.true;",
+							"});",
+							"",
+							"pm.test(\"Response Status is OK\", function () {",
+							"    pm.expect(jsonResponse.status.code).to.eql('OK');",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"category\": {\n    \"name\": \"{{testCategoryIdFromAdd}}\"\n  }\n}"
+				},
+				"url": {
+					"raw": "localhost:5000/task/category",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"task",
+						"category"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "28737e79-b4cd-4b8e-b080-fdcf29c9aa06",
+			"name": "Add New Category - Test 1 - No name",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1418a7ff-fd51-481a-aec9-502036614bca",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"HTTP Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"var response_schema = {",
+							"    \"properties\": {",
+							"        \"status\": { ",
+							"            \"type\": \"object\",",
+							"            \"properties\": {",
+							"                \"code\": \"string\",",
+							"                \"message\": \"string\"",
+							"            },",
+							"            \"required\": [ \"code\" ]",
+							"        }",
+							"    },",
+							"    \"required\": [ \"status\" ]",
+							"}",
+							"",
+							"var jsonResponse = pm.response.json();",
+							"",
+							"pm.test('Response is valid', function() {",
+							"  var validationResult = tv4.validate(jsonResponse, response_schema);",
+							"  console.log(tv4.error);",
+							"  pm.expect(validationResult).to.be.true;",
+							"});",
+							"",
+							"pm.test(\"Response Status is ERROR\", function () {",
+							"    pm.expect(jsonResponse.status.code).to.eql('ERROR');",
+							"    pm.expect(jsonResponse.status.message).not.eql(null);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"category\": {\n\t\"description\": \"Hello Testing\"\n  }\n}"
+				},
+				"url": {
+					"raw": "localhost:5000/task/category",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"task",
+						"category"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "a239ccd0-697a-4fd3-b66c-d9698ceea1a7",
+			"name": "Add New Category - Test 1 - No Body",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "49b8b4f7-5183-4fb2-86c1-112730d0c402",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"HTTP Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"var response_schema = {",
+							"    \"properties\": {",
+							"        \"status\": { ",
+							"            \"type\": \"object\",",
+							"            \"properties\": {",
+							"                \"code\": \"string\",",
+							"                \"message\": \"string\"",
+							"            },",
+							"            \"required\": [ \"code\" ]",
+							"        }",
+							"    },",
+							"    \"required\": [ \"status\" ]",
+							"}",
+							"",
+							"var jsonResponse = pm.response.json();",
+							"",
+							"pm.test('Response is valid', function() {",
+							"  var validationResult = tv4.validate(jsonResponse, response_schema);",
+							"  console.log(tv4.error);",
+							"  pm.expect(validationResult).to.be.true;",
+							"});",
+							"",
+							"pm.test(\"Response Status is ERROR\", function () {",
+							"    pm.expect(jsonResponse.status.code).to.eql('ERROR');",
+							"    pm.expect(jsonResponse.status.message).not.eql(null);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "localhost:5000/task/category",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"task",
+						"category"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "a920403e-0b13-4177-a6f6-39be3970cf1c",
+			"name": "Update a Category - Good",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "e3dca6f2-c2f7-4e35-b287-9dd01cc06d5c",
+						"type": "text/javascript",
+						"exec": [
+							"var testCategoryIdFromAdd = null;",
+							"",
+							"// Add a task to update",
+							"var testCategoryName = pm.environment.get(\"testCategoryForAdd\");",
+							"pm.sendRequest(",
+							"    {",
+							"        url: 'localhost:5000/task/category/',",
+							"        method: 'POST',",
+							"        header: {'content-type': 'application/json'},",
+							"        body: {",
+							"            mode: 'raw',",
+							"            raw: JSON.stringify({ category: { name: testCategoryName } })",
+							"        }",
+							"    }, ",
+							"    function (err, response) {",
+							"        if (err) {",
+							"            console.log('Could not cleanup after \"Update Category - Good\" test', err);",
+							"        } else {",
+							"            // Find the task & get ID for update",
+							"            var categories = response.json().categories;",
+							"            pm.sendRequest(\"localhost:5000/task/category\", function (err, response) {",
+							"                ",
+							"                var testCategoryName = pm.environment.get(\"testCategoryForAdd\");",
+							"                var categories = response.json().categories;",
+							"                ",
+							"                for (var category of categories) {",
+							"                    if (category.name == testCategoryName) {",
+							"                        pm.environment.set(\"testCategoryIdFromAdd\", category.id);",
+							"                        break;",
+							"                    }",
+							"                }",
+							"            });",
+							"        }",
+							"    }",
+							");",
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "23715241-c9e4-4b33-bca4-3ad949900a5a",
+						"type": "text/javascript",
+						"exec": [
+							"var jsonResponse = pm.response.json();",
+							"var testCategoryIdFromAdd = pm.environment.get(\"testCategoryIdFromAdd\");",
+							"var testCategoryForUpdate = pm.environment.get(\"testCategoryForUpdate\");",
+							"",
+							"var response_schema = {",
+							"    \"properties\": {",
+							"        \"status\": { ",
+							"            \"type\": \"object\",",
+							"            \"properties\": {",
+							"                \"code\": \"string\",",
+							"                \"message\": \"string\"",
+							"            },",
+							"            \"required\": [ \"code\" ]",
+							"        }",
+							"    },",
+							"    \"required\": [ \"status\" ]",
+							"}",
+							"",
+							"pm.test(\"HTTP Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test('Response is valid', function() {",
+							"  var validationResult = tv4.validate(jsonResponse, response_schema);",
+							"  console.log(tv4.error);",
+							"  pm.expect(validationResult).to.be.true;",
+							"});",
+							"",
+							"pm.test(\"Response Status is OK\", function () {",
+							"    pm.expect(jsonResponse.status.code).to.eql('OK');",
+							"});",
+							"",
+							"// Check the data was updated OK",
+							"pm.test(\"Data was upated correctly\", function () {",
+							"    var getUrl = 'localhost:5000/task/category/' + testCategoryForUpdate;",
+							"    var updatedCategory = null;",
+							"    async() => {",
+							"            await pm.sendRequest(\"localhost:5000/task/category\", function (err, response) {",
+							"                    ",
+							"            var testCategoryName = pm.environment.get(\"testCategoryForAdd\");",
+							"            var categories = response.json().categories;",
+							"            ",
+							"            for (var category of categories) {",
+							"                if (category.name == testCategoryName) {",
+							"                    updatedCategory = category;",
+							"                    break;",
+							"                }",
+							"            }",
+							"        });",
+							"    }",
+							"    ",
+							"    pm.expect(jsonResponse.category.id).to.eql('OK');",
+							"    pm.expect(jsonResponse.category.name).to.eql('OK');",
+							"});",
+							"",
+							"//Remove the added Category for cleanup",
+							"var deleteURL = 'localhost:5000/task/category/' + testCategoryIdFromAdd;",
+							"pm.sendRequest({url: deleteURL, method: 'DELETE'}, function (err, response) {",
+							"    if (err) console.log('Could not cleanup after \"Update Category - Good\" test', err);",
+							"});",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"category\": {\n    \"name\": \"{{testCategoryForUpdate}}\"\n  }\n}"
+				},
+				"url": {
+					"raw": "localhost:5000/task/category/{{testCategoryIdFromAdd}}",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"task",
+						"category",
+						"{{testCategoryIdFromAdd}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "032e8a5c-6342-4e76-95bd-c3a56e16a12f",
+			"name": "Update a Category - No Name",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "e3dca6f2-c2f7-4e35-b287-9dd01cc06d5c",
+						"type": "text/javascript",
+						"exec": [
+							"var testCategoryIdFromAdd = null;",
+							"",
+							"// Add a task to update",
+							"var testCategoryName = pm.environment.get(\"testCategoryForAdd\");",
+							"pm.sendRequest(",
+							"    {",
+							"        url: 'localhost:5000/task/category/',",
+							"        method: 'POST',",
+							"        header: {'content-type': 'application/json'},",
+							"        body: {",
+							"            mode: 'raw',",
+							"            raw: JSON.stringify({ category: { name: testCategoryName } })",
+							"        }",
+							"    }, ",
+							"    function (err, response) {",
+							"        if (err) {",
+							"            console.log('Could not cleanup after \"Update Category - Good\" test', err);",
+							"        } else {",
+							"            // Find the task & get ID for update",
+							"            var categories = response.json().categories;",
+							"            pm.sendRequest(\"localhost:5000/task/category\", function (err, response) {",
+							"                ",
+							"                var testCategoryName = pm.environment.get(\"testCategoryForAdd\");",
+							"                var categories = response.json().categories;",
+							"                ",
+							"                for (var category of categories) {",
+							"                    if (category.name == testCategoryName) {",
+							"                        pm.environment.set(\"testCategoryIdFromAdd\", category.id);",
+							"                        break;",
+							"                    }",
+							"                }",
+							"            });",
+							"        }",
+							"    }",
+							");",
+							"",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "f81ba360-3d38-4714-8ab3-47357e532d97",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"HTTP Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"var response_schema = {",
+							"    \"properties\": {",
+							"        \"status\": { ",
+							"            \"type\": \"object\",",
+							"            \"properties\": {",
+							"                \"code\": \"string\",",
+							"                \"message\": \"string\"",
+							"            },",
+							"            \"required\": [ \"code\" ]",
+							"        }",
+							"    },",
+							"    \"required\": [ \"status\" ]",
+							"}",
+							"",
+							"var jsonResponse = pm.response.json();",
+							"",
+							"pm.test('Response is valid', function() {",
+							"  var validationResult = tv4.validate(jsonResponse, response_schema);",
+							"  console.log(tv4.error);",
+							"  pm.expect(validationResult).to.be.true;",
+							"});",
+							"",
+							"pm.test(\"Response Status is ERROR\", function () {",
+							"    pm.expect(jsonResponse.status.code).to.eql('ERROR');",
+							"    pm.expect(jsonResponse.status.message).not.eql(null);",
+							"});",
+							"",
+							"//Remove the added Category for cleanup",
+							"var testCategoryIdFromAdd = pm.environment.get(\"testCategoryIdFromAdd\");",
+							"var deleteURL = 'localhost:5000/task/category/' + testCategoryIdFromAdd;",
+							"pm.sendRequest({url: deleteURL, method: 'DELETE'}, function (err, response) {",
+							"    if (err) console.log('Could not cleanup after \"Update Category - Good\" test', err);",
+							"});",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"category\": {\n  }\n}"
+				},
+				"url": {
+					"raw": "localhost:5000/task/category/{{testCategoryIdFromAdd}}",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"task",
+						"category",
+						"{{testCategoryIdFromAdd}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "bf9367e3-7c5c-4d3b-8d05-c0784678e185",
+			"name": "Delete a Category",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d42cdc57-5d0f-4db3-9c54-dec9646599f6",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"HTTP Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"var response_schema = {",
+							"    \"properties\": {",
+							"        \"status\": { ",
+							"            \"type\": \"object\",",
+							"            \"properties\": {",
+							"                \"code\": \"string\",",
+							"                \"message\": \"string\"",
+							"            },",
+							"            \"required\": [ \"code\" ]",
+							"        }",
+							"    },",
+							"    \"required\": [ \"status\" ]",
+							"}",
+							"",
+							"var jsonResponse = pm.response.json();",
+							"",
+							"pm.test('Response is valid', function() {",
+							"  var validationResult = tv4.validate(jsonResponse, response_schema);",
+							"  console.log(tv4.error);",
+							"  pm.expect(validationResult).to.be.true;",
+							"});",
+							"",
+							"pm.test(\"Response Status is OK\", function () {",
+							"    pm.expect(jsonResponse.status.code).to.eql('OK');",
+							"    pm.expect(jsonResponse.status.message).not.eql(null);",
+							"});",
+							"",
+							"//Log if added category could not be removed",
+							"if (jsonResponse.status.code) {",
+							"    console.log('Could not cleanup after \"Delete a Category\" test');",
+							"}",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "b2d4ad6c-3bd6-47fc-a35e-9edcd6feb6d2",
+						"type": "text/javascript",
+						"exec": [
+							"var testCategoryIdFromAdd = null;",
+							"",
+							"// Add a task to delete",
+							"var testCategoryName = pm.environment.get(\"testCategoryForAdd\");",
+							"pm.sendRequest(",
+							"    {",
+							"        url: 'localhost:5000/task/category/',",
+							"        method: 'POST',",
+							"        header: {'content-type': 'application/json'},",
+							"        body: {",
+							"            mode: 'raw',",
+							"            raw: JSON.stringify({ category: { name: testCategoryName } })",
+							"        }",
+							"    }, ",
+							"    function (err, response) {",
+							"        if (err) {",
+							"            console.log('Could not cleanup after \"Update Category - Good\" test', err);",
+							"        } else {",
+							"            // Find the task & get ID for update",
+							"            var categories = response.json().categories;",
+							"            pm.sendRequest(\"localhost:5000/task/category\", function (err, response) {",
+							"                ",
+							"                var testCategoryName = pm.environment.get(\"testCategoryForAdd\");",
+							"                var categories = response.json().categories;",
+							"                ",
+							"                for (var category of categories) {",
+							"                    if (category.name == testCategoryName) {",
+							"                        pm.environment.set(\"testCategoryIdFromAdd\", category.id);",
+							"                        break;",
+							"                    }",
+							"                }",
+							"            });",
+							"        }",
+							"    }",
+							");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "localhost:5000/task/category/{{testCategoryIdFromAdd}}",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"task",
+						"category",
+						"{{testCategoryIdFromAdd}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "ae18ac4f-32db-496e-b2e2-17697bd3f382",
+			"name": "Get subtasks for a specific task - Udate URL",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "localhost:5000/task/100001/subtask",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"task",
+						"100001",
+						"subtask"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "4510cd29-42fd-423c-adc8-8c1cb6628f6a",
+			"name": "Get a specific Subtask - Update URL",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "localhost:5000/task/subtask/100001",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"task",
+						"subtask",
+						"100001"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "53f8265f-f241-44b8-b5aa-99fd3d52dba0",
+			"name": "Add a subtasks for a task - Update URL and body",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"subtasks\": [\n\t{\n\t  \"description\": \"Test Subtask 1\",\n\t  \"complete\": true\n\t},\n\t{\n\t  \"description\": \"Test Subtask 2\",\n\t  \"complete\": true\n\t}\n  ]\n}"
+				},
+				"url": {
+					"raw": "localhost:5000/task/100001/subtask",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"task",
+						"100001",
+						"subtask"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "5d453246-ff0e-4884-a696-2329bb884d01",
+			"name": "Delete a subtask - Update URL with ID",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "localhost:5000/task/subtask/1",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"task",
+						"subtask",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "c24cc675-a903-48b8-901a-9d7d08830be2",
+			"name": "Update subtask - Complete only - Update URL & Body",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"subtask\": \n\t{\n\t  \"complete\": false\n\t}\n}"
+				},
+				"url": {
+					"raw": "localhost:5000/task/subtask/3",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"task",
+						"subtask",
+						"3"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "86e210ba-80cd-4244-ae3e-134c49c05d09",
+			"name": "Update subtask - Description only - Update URL & Body",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"subtask\": \n\t{\n\t  \"description\": \"Updated Description\"\n\t}\n}"
+				},
+				"url": {
+					"raw": "localhost:5000/task/subtask/3",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"task",
+						"subtask",
+						"3"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "6680df39-996e-49ba-9781-aeda163833e7",
+			"name": "Update subtask - Both Description & Complete - Update URL & Body",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"subtask\": \n\t{\n\t  \"description\": \"Test Updated Description\",\n\t  \"completed\": false\n\t}\n}"
+				},
+				"url": {
+					"raw": "localhost:5000/task/subtask/4",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"task",
+						"subtask",
+						"4"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "11b4e0f4-7bf4-4d8c-8a6d-d11bb0442dc9",
+			"name": "Delete a specific task - Update URL",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "localhost:5000/task/3",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"task",
+						"3"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "7dfbb179-2cd3-41a5-9141-2dec8c71c01f",
+			"name": "Update a specific task- Update URL & Body",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"task\":  {\n        \"description\": \"Updated New Task\",\n        \"complete\": true,\n        \"category_id\": 100001\n    }\n}"
+				},
+				"url": {
+					"raw": "localhost:5000/task/4",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"task",
+						"4"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
